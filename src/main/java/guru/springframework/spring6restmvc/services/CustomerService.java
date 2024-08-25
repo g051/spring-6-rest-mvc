@@ -12,7 +12,7 @@ public interface CustomerService {
 
     Customer getCustomerById(UUID uuid);
 
-    List<Customer> getAllCustomers();
+    List<Customer> listCustomers();
 
     Customer saveNewCustomer(Customer customer);
 }

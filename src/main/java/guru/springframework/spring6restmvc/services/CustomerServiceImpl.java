@@ -43,7 +43,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<Customer> getAllCustomers() {
+    public List<Customer> listCustomers() {
         return new ArrayList<>(customerMap.values());
     }
 

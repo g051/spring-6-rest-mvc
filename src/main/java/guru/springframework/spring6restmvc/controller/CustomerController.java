@@ -23,8 +23,8 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping
-    public List<Customer> listAllCustomers(){
-        return customerService.getAllCustomers();
+    public List<Customer> listCustomers(){
+        return customerService.listCustomers();
     }
 
     @GetMapping("{customerId}")
@@ -33,7 +33,7 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity handlePost(@RequestBody Customer customer){
+    public ResponseEntity createCustomer(@RequestBody Customer customer){
         Customer savedCustomer = customerService.saveNewCustomer(customer);
 
         HttpHeaders headers = new HttpHeaders();
