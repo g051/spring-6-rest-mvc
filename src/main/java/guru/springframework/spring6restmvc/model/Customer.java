@@ -1,14 +1,17 @@
 package guru.springframework.spring6restmvc.model;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.experimental.SuperBuilder;
 
-@SuperBuilder
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class Customer extends BaseModel {
+@Builder
+public class Customer {
 
     private String name;
+    private UUID id;
     private Integer version;
+    private LocalDateTime createdDate;
+    private LocalDateTime updateDate;
 }
