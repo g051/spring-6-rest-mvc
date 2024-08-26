@@ -24,6 +24,7 @@ import guru.springframework.spring6restmvc.services.CustomerServiceImpl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,7 +83,7 @@ class CustomerControllerTest {
 
     UUID id = customer.getId();
 
-    given(customerService.getCustomerById(id)).willReturn(customer);
+    given(customerService.getCustomerById(id)).willReturn(Optional.of(customer));
 
     mockMvc.perform(get(CustomerController.CUSTOMER_ID_PATH,  id)
             .accept(MediaType.APPLICATION_JSON))
@@ -90,6 +91,15 @@ class CustomerControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(id.toString())))
         .andExpect(jsonPath("$.name", is(customer.getName())));
+  }
+
+  @Test
+  void getCustomerByIdNotFound() throws Exception {
+
+//    given(customerService.getCustomerById(any(UUID.class))).willReturn(Optional.empty());
+
+    mockMvc.perform(get(CustomerController.CUSTOMER_ID_PATH, UUID.randomUUID()))
+        .andExpect(status().isNotFound());
   }
 
   @Test

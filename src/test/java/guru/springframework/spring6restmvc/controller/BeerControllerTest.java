@@ -22,6 +22,7 @@ import guru.springframework.spring6restmvc.services.BeerServiceImpl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -80,7 +81,7 @@ class BeerControllerTest {
 
     UUID id = beer.getId();
 
-    given(beerService.getBeerById(id)).willReturn(beer);
+    given(beerService.getBeerById(id)).willReturn(Optional.of(beer));
 
     mockMvc.perform(get(BeerController.BEER_ID_PATH, id)
             .accept(MediaType.APPLICATION_JSON))
@@ -88,6 +89,15 @@ class BeerControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id", is(id.toString())))
         .andExpect(jsonPath("$.beerName", is(beer.getBeerName())));
+  }
+
+  @Test
+  void getBeerByIdNotFound() throws Exception {
+
+    given(beerService.getBeerById(any(UUID.class))).willReturn(Optional.empty());
+
+    mockMvc.perform(get(BeerController.BEER_ID_PATH, UUID.randomUUID()))
+        .andExpect(status().isNotFound());
   }
 
   @Test
