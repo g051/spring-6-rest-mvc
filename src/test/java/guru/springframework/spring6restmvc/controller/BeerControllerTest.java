@@ -37,33 +37,31 @@ class BeerControllerTest {
   BeerService beerService;
 
   BeerServiceImpl beerServiceImpl;
+  List<Beer> beerList;
 
   @BeforeEach
   void setUp() {
+
     beerServiceImpl = new BeerServiceImpl();
+    beerList = beerServiceImpl.listBeers();
   }
 
   @Test
-  void testCreateBeer() throws Exception {
+  void listBeers() throws Exception {
 
-    Beer beer = beerServiceImpl.listBeers().get(0);
-    beer.setVersion(null);
-    beer.setId(null);
+    given(beerService.listBeers()).willReturn(beerList);
 
-    given(beerService.saveNewBeer(any(Beer.class))).willReturn(beerServiceImpl.listBeers().get(1));
-
-    mockMvc.perform(post("/api/v1/beer")
-            .accept(MediaType.APPLICATION_JSON)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(beer)))
-        .andExpect(status().isCreated())
-        .andExpect(header().exists("Location"));
+    mockMvc.perform(get("/api/v1/beer")
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.length()", is(beerList.size())));
   }
 
   @Test
   void getBeerById() throws Exception {
 
-    Beer testBeer = beerServiceImpl.listBeers().get(0);
+    Beer testBeer = beerList.get(0);
     UUID id = testBeer.getId();
 
     given(beerService.getBeerById(id)).willReturn(testBeer);
@@ -77,16 +75,19 @@ class BeerControllerTest {
   }
 
   @Test
-  void listBeers() throws Exception {
+  void createBeer() throws Exception {
 
-    List<Beer> beerList = beerServiceImpl.listBeers();
+    Beer beer = beerList.get(0);
+    beer.setVersion(null);
+    beer.setId(null);
 
-    given(beerService.listBeers()).willReturn(beerList);
+    given(beerService.saveNewBeer(any(Beer.class))).willReturn(beerList.get(1));
 
-    mockMvc.perform(get("/api/v1/beer")
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.length()", is(beerList.size())));
+    mockMvc.perform(post("/api/v1/beer")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(beer)))
+        .andExpect(status().isCreated())
+        .andExpect(header().exists("Location"));
   }
 }
