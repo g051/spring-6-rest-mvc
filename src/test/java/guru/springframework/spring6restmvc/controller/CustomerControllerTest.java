@@ -70,7 +70,7 @@ class CustomerControllerTest {
 
     given(customerService.listCustomers()).willReturn(customerList);
 
-    mockMvc.perform(get("/api/v1/customer")
+    mockMvc.perform(get(CustomerController.CUSTOMER_PATH)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -84,7 +84,7 @@ class CustomerControllerTest {
 
     given(customerService.getCustomerById(id)).willReturn(customer);
 
-    mockMvc.perform(get("/api/v1/customer/" + id)
+    mockMvc.perform(get(CustomerController.CUSTOMER_ID_PATH,  id)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -100,7 +100,7 @@ class CustomerControllerTest {
 
     given(customerService.saveNewCustomer(any(Customer.class))).willReturn(customerList.get(1));
 
-    mockMvc.perform(post("/api/v1/customer")
+    mockMvc.perform(post(CustomerController.CUSTOMER_PATH)
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(customer)))
@@ -111,7 +111,7 @@ class CustomerControllerTest {
   @Test
   void updateCustomerById() throws Exception {
 
-    mockMvc.perform(put("/api/v1/customer/" + customer.getId())
+    mockMvc.perform(put(CustomerController.CUSTOMER_ID_PATH,  customer.getId())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(customer)))
@@ -126,7 +126,7 @@ class CustomerControllerTest {
     Map<String, Object> custMap = new HashMap<>();
     custMap.put("name", "New Name");
 
-    mockMvc.perform(patch("/api/v1/customer/" + customer.getId())
+    mockMvc.perform(patch(CustomerController.CUSTOMER_ID_PATH,  customer.getId())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(custMap)))
@@ -141,7 +141,7 @@ class CustomerControllerTest {
   @Test
   void deleteCustomerById() throws Exception {
 
-    mockMvc.perform(delete("/api/v1/customer/" + customer.getId()))
+    mockMvc.perform(delete(CustomerController.CUSTOMER_ID_PATH,  customer.getId()))
         .andExpect(status().isNoContent());
 
     // Option 1: compare UUID directly

@@ -68,7 +68,7 @@ class BeerControllerTest {
 
     given(beerService.listBeers()).willReturn(beerList);
 
-    mockMvc.perform(get("/api/v1/beer")
+    mockMvc.perform(get(BeerController.BEER_PATH)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -82,7 +82,7 @@ class BeerControllerTest {
 
     given(beerService.getBeerById(id)).willReturn(beer);
 
-    mockMvc.perform(get("/api/v1/beer/" + id)
+    mockMvc.perform(get(BeerController.BEER_ID_PATH, id)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -98,7 +98,7 @@ class BeerControllerTest {
 
     given(beerService.saveNewBeer(any(Beer.class))).willReturn(beerList.get(1));
 
-    mockMvc.perform(post("/api/v1/beer")
+    mockMvc.perform(post(BeerController.BEER_PATH)
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(beer)))
@@ -109,7 +109,7 @@ class BeerControllerTest {
   @Test
   void updateBeerById() throws Exception {
 
-    mockMvc.perform(put("/api/v1/beer/" + beer.getId())
+    mockMvc.perform(put(BeerController.BEER_ID_PATH, beer.getId())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(beer)))
@@ -124,7 +124,7 @@ class BeerControllerTest {
     Map<String, Object> beerMap = new HashMap<>();
     beerMap.put("beerName", "New Beer Name");
 
-    mockMvc.perform(patch("/api/v1/beer/" + beer.getId())
+    mockMvc.perform(patch(BeerController.BEER_ID_PATH, beer.getId())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(beerMap)))
@@ -139,7 +139,7 @@ class BeerControllerTest {
   @Test
   void deleteBeerById() throws Exception {
 
-    mockMvc.perform(delete("/api/v1/beer/" + beer.getId()))
+    mockMvc.perform(delete(BeerController.BEER_ID_PATH, beer.getId()))
         .andExpect(status().isNoContent());
 
     verify(beerService).deleteBeerById(uuidArgumentCaptor.capture());
