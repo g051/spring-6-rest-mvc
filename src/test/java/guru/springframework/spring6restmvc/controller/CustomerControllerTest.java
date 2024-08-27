@@ -16,9 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import guru.springframework.spring6restmvc.model.Customer;
+import guru.springframework.spring6restmvc.model.CustomerDTO;
 import guru.springframework.spring6restmvc.services.CustomerService;
 import guru.springframework.spring6restmvc.services.CustomerServiceImpl;
 import java.util.HashMap;
@@ -49,14 +48,14 @@ class CustomerControllerTest {
   CustomerService customerService;
 
   CustomerServiceImpl customerServiceImpl;
-  List<Customer> customerList;
-  Customer customer;
+  List<CustomerDTO> customerList;
+  CustomerDTO customer;
 
   @Captor
   ArgumentCaptor<UUID> uuidArgumentCaptor;
 
   @Captor
-  ArgumentCaptor<Customer> customerArgumentCaptor;
+  ArgumentCaptor<CustomerDTO> customerArgumentCaptor;
 
   @BeforeEach
   void setUp() {
@@ -108,7 +107,7 @@ class CustomerControllerTest {
     customer.setVersion(null);
     customer.setId(null);
 
-    given(customerService.saveNewCustomer(any(Customer.class))).willReturn(customerList.get(1));
+    given(customerService.saveNewCustomer(any(CustomerDTO.class))).willReturn(customerList.get(1));
 
     mockMvc.perform(post(CustomerController.CUSTOMER_PATH)
             .accept(MediaType.APPLICATION_JSON)

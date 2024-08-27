@@ -1,6 +1,6 @@
 package guru.springframework.spring6restmvc.controller;
 
-import guru.springframework.spring6restmvc.model.Beer;
+import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.services.BeerService;
 import java.util.List;
 import java.util.UUID;
@@ -10,15 +10,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -32,21 +29,21 @@ public class BeerController {
     private final BeerService beerService;
 
     @GetMapping(BEER_PATH)
-    public List<Beer> listBeers(){
+    public List<BeerDTO> listBeers(){
         return beerService.listBeers();
     }
 
     @GetMapping(BEER_ID_PATH)
-    public Beer getBeerById(@PathVariable("beerId") UUID id){
+    public BeerDTO getBeerById(@PathVariable("beerId") UUID id){
         log.debug("Get Beer by Id - in controller");
         return beerService.getBeerById(id).orElseThrow(NotFoundException::new);
     }
 
     @PostMapping(BEER_PATH)
     //@RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity createBeer(@RequestBody Beer beer){
+    public ResponseEntity createBeer(@RequestBody BeerDTO beer){
 
-        Beer savedBeer = beerService.saveNewBeer(beer);
+        BeerDTO savedBeer = beerService.saveNewBeer(beer);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location", "/api/v1/beer/" + savedBeer.getId().toString());
@@ -55,13 +52,13 @@ public class BeerController {
     }
 
     @PutMapping(BEER_ID_PATH)
-    public ResponseEntity updateBeerById(@PathVariable("beerId")UUID id, @RequestBody Beer beer) {
+    public ResponseEntity updateBeerById(@PathVariable("beerId")UUID id, @RequestBody BeerDTO beer) {
         beerService.updateBeerById(id, beer);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping(BEER_ID_PATH)
-    public ResponseEntity patchBeerById(@PathVariable("beerId")UUID id, @RequestBody Beer beer) {
+    public ResponseEntity patchBeerById(@PathVariable("beerId")UUID id, @RequestBody BeerDTO beer) {
         beerService.patchBeerById(id, beer);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }

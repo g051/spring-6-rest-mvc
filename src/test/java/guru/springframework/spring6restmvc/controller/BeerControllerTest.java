@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import guru.springframework.spring6restmvc.model.Beer;
+import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.services.BeerService;
 import guru.springframework.spring6restmvc.services.BeerServiceImpl;
 import java.util.HashMap;
@@ -47,14 +47,14 @@ class BeerControllerTest {
   BeerService beerService;
 
   BeerServiceImpl beerServiceImpl;
-  List<Beer> beerList;
-  Beer beer;
+  List<BeerDTO> beerList;
+  BeerDTO beer;
 
   @Captor
   ArgumentCaptor<UUID> uuidArgumentCaptor;
 
   @Captor
-  ArgumentCaptor<Beer> beerArgumentCaptor;
+  ArgumentCaptor<BeerDTO> beerArgumentCaptor;
 
   @BeforeEach
   void setUp() {
@@ -106,7 +106,7 @@ class BeerControllerTest {
     beer.setVersion(null);
     beer.setId(null);
 
-    given(beerService.saveNewBeer(any(Beer.class))).willReturn(beerList.get(1));
+    given(beerService.saveNewBeer(any(BeerDTO.class))).willReturn(beerList.get(1));
 
     mockMvc.perform(post(BeerController.BEER_PATH)
             .accept(MediaType.APPLICATION_JSON)
