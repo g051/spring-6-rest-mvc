@@ -36,7 +36,8 @@ public class BeerServiceImpl implements BeerService {
     return createBeer(name, style, upc, BigDecimal.valueOf(price), quantity);
   }
 
-  private BeerDTO createBeer(String name, BeerStyle style, String upc, BigDecimal price, int quantity) {
+  private BeerDTO createBeer(String name, BeerStyle style, String upc, BigDecimal price,
+      int quantity) {
 
     return BeerDTO.builder()
         .id(getUUID())
@@ -67,68 +68,74 @@ public class BeerServiceImpl implements BeerService {
   @Override
   public BeerDTO saveNewBeer(BeerDTO beer) {
 
-    BeerDTO savedBeer = createBeer(beer.getBeerName(), beer.getBeerStyle(), beer.getUpc(), beer.getPrice(), beer.getQuantityOnHand());
+    BeerDTO savedBeer = createBeer(beer.getBeerName(), beer.getBeerStyle(), beer.getUpc(),
+        beer.getPrice(), beer.getQuantityOnHand());
     beerMap.put(savedBeer.getId(), savedBeer);
 
     return savedBeer;
   }
 
   @Override
-  public void updateBeerById(UUID id, BeerDTO beer) {
+  public Optional<BeerDTO> updateBeerById(UUID id, BeerDTO beer) {
 
-      BeerDTO existing = beerMap.get(id);
-      existing.setVersion(existing.getVersion() + 1);
-      existing.setBeerName(beer.getBeerName());
-      existing.setBeerStyle(beer.getBeerStyle());
-      existing.setPrice(beer.getPrice());
-      existing.setUpc(beer.getUpc());
-      existing.setQuantityOnHand(beer.getQuantityOnHand());
-      existing.setUpdateDate(LocalDateTime.now());
+    BeerDTO existing = beerMap.get(id);
+    existing.setVersion(existing.getVersion() + 1);
+    existing.setBeerName(beer.getBeerName());
+    existing.setBeerStyle(beer.getBeerStyle());
+    existing.setPrice(beer.getPrice());
+    existing.setUpc(beer.getUpc());
+    existing.setQuantityOnHand(beer.getQuantityOnHand());
+    existing.setUpdateDate(LocalDateTime.now());
+    beerMap.put(id, existing);
 
-      beerMap.put(id, existing);
+    return Optional.of(beerMap.get(id));
   }
 
   @Override
-  public void deleteBeerById(UUID id) {
+  public Boolean deleteBeerById(UUID id) {
     beerMap.remove(id);
+    return true;
   }
 
   @Override
-  public void patchBeerById(UUID id, BeerDTO beer) {
+  public Optional<BeerDTO> patchBeerById(UUID id, BeerDTO beer) {
 
     BeerDTO existing = beerMap.get(id);
     boolean patched = false;
 
-    if(StringUtils.hasText(beer.getBeerName())) {
+    if (StringUtils.hasText(beer.getBeerName())) {
       existing.setBeerName(beer.getBeerName());
       patched = true;
     }
 
-    if(beer.getBeerStyle() != null) {
+    if (beer.getBeerStyle() != null) {
       existing.setBeerStyle(beer.getBeerStyle());
       patched = true;
     }
 
-    if(StringUtils.hasText(beer.getUpc())) {
+    if (StringUtils.hasText(beer.getUpc())) {
       existing.setUpc(beer.getUpc());
       patched = true;
     }
 
-    if(beer.getPrice() != null) {
+    if (beer.getPrice() != null) {
       existing.setPrice(beer.getPrice());
       patched = true;
     }
 
-    if(beer.getQuantityOnHand() != null) {
+    if (beer.getQuantityOnHand() != null) {
       existing.setQuantityOnHand(beer.getQuantityOnHand());
       patched = true;
     }
 
-    if(patched) {
+    if (patched) {
       existing.setVersion(existing.getVersion() + 1);
       existing.setUpdateDate(LocalDateTime.now());
       beerMap.put(id, existing);
+
+      return Optional.of(beerMap.get(id));
     }
+    return Optional.empty();
   }
 }
 

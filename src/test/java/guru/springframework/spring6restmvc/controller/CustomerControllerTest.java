@@ -120,6 +120,8 @@ class CustomerControllerTest {
   @Test
   void updateCustomerById() throws Exception {
 
+    given(customerService.updateCustomerById(customer.getId(), customer)).willReturn(Optional.of(customer));
+
     mockMvc.perform(put(CustomerController.CUSTOMER_ID_PATH,  customer.getId())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
@@ -134,6 +136,8 @@ class CustomerControllerTest {
 
     Map<String, Object> custMap = new HashMap<>();
     custMap.put("name", "New Name");
+
+    given(customerService.patchCustomerById(any(), any())).willReturn(Optional.of(customer));
 
     mockMvc.perform(patch(CustomerController.CUSTOMER_ID_PATH,  customer.getId())
             .accept(MediaType.APPLICATION_JSON)
