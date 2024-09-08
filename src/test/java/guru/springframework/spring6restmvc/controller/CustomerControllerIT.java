@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,9 +63,7 @@ class CustomerControllerIT {
 
   @Test
   void getCustomerByIdNotFound() {
-    assertThrows(NotFoundException.class, () -> {
-      customerController.getCustomerById(UUID.randomUUID());
-    });
+    assertThrows(NotFoundException.class, () -> customerController.getCustomerById(UUID.randomUUID()));
   }
 
   @Rollback
@@ -74,7 +71,7 @@ class CustomerControllerIT {
   @Test
   void createCustomer() {
     CustomerDTO customerDTO = CustomerDTO.builder().name("New Customer").build();
-    ResponseEntity responseEntity = customerController.createCustomer(customerDTO);
+    var responseEntity = customerController.createCustomer(customerDTO);
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
     URI location = responseEntity.getHeaders().getLocation();
@@ -95,19 +92,17 @@ class CustomerControllerIT {
     customerDTO.setVersion(null);
     customerDTO.setName(newName);
 
-    ResponseEntity responseEntity = customerController.updateCustomerById(customer.getId(), customerDTO);
+    var responseEntity = customerController.updateCustomerById(customer.getId(), customerDTO);
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    customerRepository.findById(customer.getId()).ifPresent(updatedCustomer -> {
-      assertThat(updatedCustomer.getName()).isEqualTo(newName);
-    });
+    customerRepository.findById(customer.getId()).ifPresent(
+        updatedCustomer -> assertThat(updatedCustomer.getName()).isEqualTo(newName));
   }
 
   @Test
   void updateCustomerByIdNotFound() {
-    assertThrows(NotFoundException.class, () -> {
-      customerController.updateCustomerById(UUID.randomUUID(), CustomerDTO.builder().build());
-    });
+    assertThrows(NotFoundException.class, () -> 
+        customerController.updateCustomerById(UUID.randomUUID(), CustomerDTO.builder().build()));
   }
 
   @Rollback
@@ -117,34 +112,28 @@ class CustomerControllerIT {
     final String newName = "New Name";
     CustomerDTO customerDTO = CustomerDTO.builder().name(newName).build();
 
-    ResponseEntity responseEntity = customerController.patchCustomerById(customer.getId(), customerDTO);
+    var responseEntity = customerController.patchCustomerById(customer.getId(), customerDTO);
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 
-    customerRepository.findById(customer.getId()).ifPresent(updatedCustomer -> {
-      assertThat(updatedCustomer.getName()).isEqualTo(newName);
-    });
+    customerRepository.findById(customer.getId()).ifPresent(updatedCustomer -> assertThat(updatedCustomer.getName()).isEqualTo(newName));
   }
 
   @Test
   void patchCustomerByIdNotFound() {
-    assertThrows(NotFoundException.class, () -> {
-      customerController.patchCustomerById(UUID.randomUUID(), CustomerDTO.builder().build());
-    });
+    assertThrows(NotFoundException.class, () -> customerController.patchCustomerById(UUID.randomUUID(), CustomerDTO.builder().build()));
   }
 
   @Rollback
   @Transactional
   @Test
   void deleteCustomerById() {
-    ResponseEntity responseEntity = customerController.deleteCustomerById(customer.getId());
+    var responseEntity = customerController.deleteCustomerById(customer.getId());
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     assertThat(customerRepository.findById(customer.getId())).isEmpty();
   }
 
   @Test
   void deleteCustomerByIdNotFound() {
-    assertThrows(NotFoundException.class, () -> {
-      customerController.deleteCustomerById(UUID.randomUUID());
-    });
+    assertThrows(NotFoundException.class, () -> customerController.deleteCustomerById(UUID.randomUUID()));
   }
 }
