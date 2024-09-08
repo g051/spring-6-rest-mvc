@@ -33,6 +33,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(BeerController.class)
 class BeerControllerTest {
@@ -117,6 +118,27 @@ class BeerControllerTest {
   }
 
   @Test
+  void createBeerWithNullName() throws Exception {
+
+    beer.setBeerName(null);
+    beer.setPrice(null);
+    beer.setBeerStyle(null);
+    beer.setUpc(" ");
+
+    given(beerService.saveNewBeer(any(BeerDTO.class))).willReturn(beerList.get(1));
+
+    MvcResult mvcResult = mockMvc.perform(post(BeerController.BEER_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(beer)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.length()", is(4)))
+        .andReturn();
+
+    System.out.println(mvcResult.getResponse().getContentAsString());
+  }
+
+  @Test
   void updateBeerById() throws Exception {
 
     given(beerService.updateBeerById(beer.getId(), beer)).willReturn(Optional.of(beer));
@@ -128,6 +150,21 @@ class BeerControllerTest {
         .andExpect(status().isNoContent());
 
     verify(beerService).updateBeerById(beer.getId(), beer);
+  }
+
+  @Test
+  void updateBeerByIdWithNullName() throws Exception {
+
+    given(beerService.updateBeerById(beer.getId(), beer)).willReturn(Optional.of(beer));
+
+    beer.setBeerName(null);
+
+    mockMvc.perform(put(BeerController.BEER_ID_PATH, beer.getId())
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(beer)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.length()", is(1)));
   }
 
   @Test

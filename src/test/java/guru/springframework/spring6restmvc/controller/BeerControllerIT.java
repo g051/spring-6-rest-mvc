@@ -1,14 +1,21 @@
 package guru.springframework.spring6restmvc.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.springframework.spring6restmvc.entities.Beer;
 import guru.springframework.spring6restmvc.mappers.BeerMapper;
 import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
@@ -17,9 +24,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
 class BeerControllerIT {
@@ -33,10 +45,19 @@ class BeerControllerIT {
   @Autowired
   BeerMapper beerMapper;
 
+  @Autowired
+  ObjectMapper objectMapper;
+
+  @Autowired
+  WebApplicationContext wac;
+
+  MockMvc mockMvc;
+
   Beer beer;
 
   @BeforeEach
   void setUp() {
+    mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     beer = beerRepository.findAll().get(0);
   }
 
@@ -57,13 +78,13 @@ class BeerControllerIT {
   }
 
   @Test
-  void getBeerById() {
+  void getBeer() {
     BeerDTO dto = beerController.getBeerById(beer.getId());
     assertThat(dto).isNotNull();
   }
 
   @Test
-  void getBeerByIdNotFound() {
+  void getBeerNotFound() {
     assertThrows(NotFoundException.class, () -> {
       beerController.getBeerById(UUID.randomUUID());
     });
@@ -88,7 +109,7 @@ class BeerControllerIT {
   @Rollback
   @Transactional
   @Test
-  void updateBeerById() {
+  void updateBeer() {
     final String beerName = "New Beer Name";
     BeerDTO beerDTO = beerMapper.beerToBeerDTO(beer);
     beerDTO.setId(null);
@@ -104,7 +125,7 @@ class BeerControllerIT {
   }
 
   @Test
-  void updateBeerByIdNotFound() {
+  void updateBeerNotFound() {
     assertThrows(NotFoundException.class, () -> {
       beerController.updateBeerById(UUID.randomUUID(), BeerDTO.builder().build());
     });
@@ -113,7 +134,7 @@ class BeerControllerIT {
   @Rollback
   @Transactional
   @Test
-  void patchBeerById() {
+  void patchBeer() {
     final String beerName = "New Beer Name";
     BeerDTO beerDTO = BeerDTO.builder().beerName(beerName).build();
 
@@ -126,23 +147,40 @@ class BeerControllerIT {
   }
 
   @Test
-  void patchBeerByIdNotFound() {
+  void patchBeerNotFound() {
     assertThrows(NotFoundException.class, () -> {
       beerController.patchBeerById(UUID.randomUUID(), BeerDTO.builder().build());
     });
   }
 
+  @Test
+  void patchBeerWithBadName() throws Exception {
+
+    Map<String, Object> beerMap = new HashMap<>();
+    beerMap.put("beerName", "New Beer Name".repeat(10));
+
+    MvcResult result = mockMvc.perform(patch(BeerController.BEER_ID_PATH, beer.getId())
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(beerMap)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.length()", is(1)))
+        .andReturn();
+
+    System.out.println(result.getResponse().getContentAsString());
+  }
+
   @Rollback
   @Transactional
   @Test
-  void deleteBeerById() {
+  void deleteBeer() {
     ResponseEntity responseEntity = beerController.deleteBeerById(beer.getId());
     assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     assertThat(beerRepository.findById(beer.getId())).isEmpty();
   }
 
   @Test
-  void deleteBeerByIdNotFound() {
+  void deleteBeerNotFound() {
     assertThrows(NotFoundException.class, () -> {
       beerController.deleteBeerById(UUID.randomUUID());
     });

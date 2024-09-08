@@ -6,9 +6,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -59,7 +59,6 @@ class CustomerControllerTest {
 
   @BeforeEach
   void setUp() {
-
     customerServiceImpl = new CustomerServiceImpl();
     customerList = customerServiceImpl.listCustomers();
     customer = customerList.get(0);
@@ -153,6 +152,8 @@ class CustomerControllerTest {
 
   @Test
   void deleteCustomerById() throws Exception {
+
+    given(customerService.deleteCustomerById(any())).willReturn(true);
 
     mockMvc.perform(delete(CustomerController.CUSTOMER_ID_PATH,  customer.getId()))
         .andExpect(status().isNoContent());
