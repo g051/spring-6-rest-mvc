@@ -61,14 +61,14 @@ class BeerControllerTest {
   void setUp() {
 
     beerServiceImpl = new BeerServiceImpl();
-    beerList = beerServiceImpl.listBeers();
+    beerList = beerServiceImpl.listBeers(null, null, false);
     beer = beerList.get(0);
   }
 
   @Test
   void listBeers() throws Exception {
 
-    given(beerService.listBeers()).willReturn(beerList);
+    given(beerService.listBeers(null, null, null)).willReturn(beerList);
 
     mockMvc.perform(get(BeerController.BEER_PATH)
             .accept(MediaType.APPLICATION_JSON))
