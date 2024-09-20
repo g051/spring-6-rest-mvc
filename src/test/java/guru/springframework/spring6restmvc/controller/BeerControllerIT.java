@@ -1,5 +1,6 @@
 package guru.springframework.spring6restmvc.controller;
 
+import static guru.springframework.spring6restmvc.services.BeerServiceJPA.DEFAULT_PAGE_SIZE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -16,7 +17,6 @@ import guru.springframework.spring6restmvc.model.BeerStyle;
 import guru.springframework.spring6restmvc.repositories.BeerRepository;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
@@ -65,8 +66,8 @@ class BeerControllerIT {
 
   @Test
   void listBeers() {
-    List<BeerDTO> dtos = beerController.listBeers(null, null, false);
-    assertThat(dtos.size()).isEqualTo(beerRepository.count());
+    Page<BeerDTO> dtos = beerController.listBeers(null, null, false, 1, 25);
+    assertThat(dtos.getContent().size()).isEqualTo(DEFAULT_PAGE_SIZE);
   }
 
   @Rollback
@@ -75,8 +76,8 @@ class BeerControllerIT {
   void listBeersEmpty() {
     beerRepository.deleteAll();
 
-    List<BeerDTO> dtos = beerController.listBeers(null, null, false);
-    assertThat(dtos.size()).isEqualTo(0);
+    Page<BeerDTO> dtos = beerController.listBeers(null, null, false, 1, 25);
+    assertThat(dtos.getContent().size()).isEqualTo(0);
   }
 
   @Test
@@ -85,7 +86,7 @@ class BeerControllerIT {
             .queryParam("name", "IPA")
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.size()", is(336)));
+        .andExpect(jsonPath("$.content.size()", is(DEFAULT_PAGE_SIZE)));
   }
 
   @Test
@@ -94,7 +95,7 @@ class BeerControllerIT {
             .queryParam("style", BeerStyle.IPA.name())
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.size()", is(548)));
+        .andExpect(jsonPath("$.content.size()", is(DEFAULT_PAGE_SIZE)));
   }
 
   @Test
@@ -104,8 +105,8 @@ class BeerControllerIT {
             .queryParam("style", BeerStyle.IPA.name())
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.size()", is(310)))
-        .andExpect(jsonPath("$.[0].quantityOnHand").value(IsNull.notNullValue()));
+        .andExpect(jsonPath("$.content.size()", is(DEFAULT_PAGE_SIZE)))
+        .andExpect(jsonPath("$.content[0].quantityOnHand").value(IsNull.notNullValue()));
   }
 
   @Test
@@ -116,8 +117,22 @@ class BeerControllerIT {
             .queryParam("showInventory", "false")
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.size()", is(310)))
-        .andExpect(jsonPath("$.[0].quantityOnHand").value(IsNull.nullValue()));
+        .andExpect(jsonPath("$.content.size()", is(DEFAULT_PAGE_SIZE)))
+        .andExpect(jsonPath("$.content[0].quantityOnHand").value(IsNull.nullValue()));
+  }
+
+  @Test
+  void listBeerByStyleAndNameShowInventoryTruePage2() throws Exception {
+    mockMvc.perform(get(BeerController.BEER_PATH)
+            .queryParam("name", "IPA")
+            .queryParam("style", BeerStyle.IPA.name())
+            .queryParam("showInventory", "true")
+            .queryParam("pageNumber", "2")
+            .queryParam("pageSize", "50")
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.size()", is(50)))
+        .andExpect(jsonPath("$.content[0].quantityOnHand").value(IsNull.notNullValue()));
   }
 
   @Test

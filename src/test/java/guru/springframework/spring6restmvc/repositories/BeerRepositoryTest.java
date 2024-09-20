@@ -9,12 +9,12 @@ import guru.springframework.spring6restmvc.model.BeerStyle;
 import guru.springframework.spring6restmvc.services.BeerCsvServiceImpl;
 import jakarta.validation.ConstraintViolationException;
 import java.math.BigDecimal;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 
 @DataJpaTest
 @Import({BootstrapData.class, BeerCsvServiceImpl.class})
@@ -55,7 +55,7 @@ class BeerRepositoryTest {
 
   @Test
   void findAllByBeerNameIsLikeIgnoreCase() {
-    List<Beer> list = beerRepository.findAllByBeerNameIsLikeIgnoreCase("%IPA%");
-    assertThat(list.size()).isEqualTo(336);
+    Page<Beer> beerPage = beerRepository.findAllByBeerNameIsLikeIgnoreCase("%IPA%", null);
+    assertThat(beerPage.getTotalElements()).isEqualTo(336);
   }
 }
