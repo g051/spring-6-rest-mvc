@@ -61,8 +61,6 @@ public class Beer {
   @NotNull
   private BigDecimal price;
 
-  @NotBlank
-  @Size(max = 255)
   private Integer quantityOnHand;
 
   @OneToMany(mappedBy = "beer")
