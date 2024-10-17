@@ -4,6 +4,8 @@ import static guru.springframework.spring6restmvc.services.BeerServiceJPA.DEFAUL
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -25,6 +27,7 @@ import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -54,13 +57,19 @@ class BeerControllerIT {
   @Autowired
   WebApplicationContext wac;
 
+  @Value("${spring.security.user.name}")
+  String username;
+
+  @Value("${spring.security.user.password}")
+  String password;
   MockMvc mockMvc;
 
   Beer beer;
 
   @BeforeEach
   void setUp() {
-    mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+        .apply(springSecurity()).build();
     beer = beerRepository.findAll().get(0);
   }
 
@@ -83,6 +92,7 @@ class BeerControllerIT {
   @Test
   void listBeerByName() throws Exception {
     mockMvc.perform(get(BeerController.BEER_PATH)
+            .with(httpBasic(username, password))
             .queryParam("name", "IPA")
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -92,6 +102,7 @@ class BeerControllerIT {
   @Test
   void listBeerByStyle() throws Exception {
     mockMvc.perform(get(BeerController.BEER_PATH)
+            .with(httpBasic(username, password))
             .queryParam("style", BeerStyle.IPA.name())
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -99,8 +110,17 @@ class BeerControllerIT {
   }
 
   @Test
+  void listBeerNoAuth() throws Exception {
+    mockMvc.perform(get(BeerController.BEER_PATH)
+            .queryParam("name", "IPA")
+            .queryParam("style", BeerStyle.IPA.name()))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
   void listBeerByStyleAndName() throws Exception {
     mockMvc.perform(get(BeerController.BEER_PATH)
+            .with(httpBasic(username, password))
             .queryParam("name", "IPA")
             .queryParam("style", BeerStyle.IPA.name())
             .accept(MediaType.APPLICATION_JSON))
@@ -112,6 +132,7 @@ class BeerControllerIT {
   @Test
   void listBeerByStyleAndNameShowInventoryFalse() throws Exception {
     mockMvc.perform(get(BeerController.BEER_PATH)
+            .with(httpBasic(username, password))
             .queryParam("name", "IPA")
             .queryParam("style", BeerStyle.IPA.name())
             .queryParam("showInventory", "false")
@@ -124,6 +145,7 @@ class BeerControllerIT {
   @Test
   void listBeerByStyleAndNameShowInventoryTruePage2() throws Exception {
     mockMvc.perform(get(BeerController.BEER_PATH)
+            .with(httpBasic(username, password))
             .queryParam("name", "IPA")
             .queryParam("style", BeerStyle.IPA.name())
             .queryParam("showInventory", "true")
@@ -212,6 +234,7 @@ class BeerControllerIT {
     beerMap.put("beerName", "New Beer Name".repeat(10));
 
     MvcResult result = mockMvc.perform(patch(BeerController.BEER_ID_PATH, beer.getId())
+            .with(httpBasic(username, password))
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(beerMap)))
