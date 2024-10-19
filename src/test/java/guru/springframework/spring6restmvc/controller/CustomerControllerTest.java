@@ -53,12 +53,6 @@ class CustomerControllerTest {
   @MockBean
   CustomerService customerService;
 
-  @Value("${spring.security.user.name}")
-  String username;
-
-  @Value("${spring.security.user.password}")
-  String password;
-
   CustomerServiceImpl customerServiceImpl;
   List<CustomerDTO> customerList;
   CustomerDTO customer;
@@ -82,7 +76,7 @@ class CustomerControllerTest {
     given(customerService.listCustomers()).willReturn(customerList);
 
     mockMvc.perform(get(CustomerController.CUSTOMER_PATH)
-            .with(httpBasic(username, password))
+            .with(BeerControllerTest.jtwRequestPostProcessor)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -97,7 +91,7 @@ class CustomerControllerTest {
     given(customerService.getCustomerById(id)).willReturn(Optional.of(customer));
 
     mockMvc.perform(get(CustomerController.CUSTOMER_ID_PATH,  id)
-            .with(httpBasic(username, password))
+            .with(BeerControllerTest.jtwRequestPostProcessor)
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -111,7 +105,7 @@ class CustomerControllerTest {
 //    given(customerService.getCustomerById(any(UUID.class))).willReturn(Optional.empty());
 
     mockMvc.perform(get(CustomerController.CUSTOMER_ID_PATH, UUID.randomUUID())
-            .with(httpBasic(username, password)))
+            .with(BeerControllerTest.jtwRequestPostProcessor))
         .andExpect(status().isNotFound());
   }
 
@@ -124,7 +118,7 @@ class CustomerControllerTest {
     given(customerService.saveNewCustomer(any(CustomerDTO.class))).willReturn(customerList.get(1));
 
     mockMvc.perform(post(CustomerController.CUSTOMER_PATH)
-            .with(httpBasic(username, password))
+            .with(BeerControllerTest.jtwRequestPostProcessor)
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(customer)))
@@ -138,7 +132,7 @@ class CustomerControllerTest {
     given(customerService.updateCustomerById(customer.getId(), customer)).willReturn(Optional.of(customer));
 
     mockMvc.perform(put(CustomerController.CUSTOMER_ID_PATH,  customer.getId())
-            .with(httpBasic(username, password))
+            .with(BeerControllerTest.jtwRequestPostProcessor)
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(customer)))
@@ -156,7 +150,7 @@ class CustomerControllerTest {
     given(customerService.patchCustomerById(any(), any())).willReturn(Optional.of(customer));
 
     mockMvc.perform(patch(CustomerController.CUSTOMER_ID_PATH,  customer.getId())
-            .with(httpBasic(username, password))
+            .with(BeerControllerTest.jtwRequestPostProcessor)
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(custMap)))
@@ -174,7 +168,7 @@ class CustomerControllerTest {
     given(customerService.deleteCustomerById(any())).willReturn(true);
 
     mockMvc.perform(delete(CustomerController.CUSTOMER_ID_PATH,  customer.getId())
-            .with(httpBasic(username, password)))
+            .with(BeerControllerTest.jtwRequestPostProcessor))
         .andExpect(status().isNoContent());
 
     // Option 1: compare UUID directly
