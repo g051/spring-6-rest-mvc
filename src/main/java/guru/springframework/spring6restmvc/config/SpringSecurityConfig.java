@@ -14,14 +14,16 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SpringSecurityConfig {
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-    httpSecurity.authorizeHttpRequests(matcherRegistry -> matcherRegistry.anyRequest().authenticated())
+    http.authorizeHttpRequests(authorize -> authorize
+            .requestMatchers("/v3/api-docs**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+            .anyRequest().authenticated())
 //        .httpBasic(Customizer.withDefaults())
 //        .csrf(CsrfConfigurer -> CsrfConfigurer.ignoringRequestMatchers("/api/**"));
         .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()));
 
-    return httpSecurity.build();
+    return http.build();
   }
 
 }
